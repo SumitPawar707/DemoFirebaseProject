@@ -23,39 +23,27 @@
         android:textSize="20sp"
         android:hint="Enter Description"/>
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_save"
+        android:id="@+id/add_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save"
+        android:text="Add"
         android:textStyle="bold"/>
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_updateTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Update Title"
-        android:textStyle="bold"/>
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_deleteDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Delete Description"
-        android:textStyle="bold"/>
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_deleteNote"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:text="Delete Note"/>
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_load"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Load"
         android:textStyle="bold"/>
-    <TextView
-        android:id="@+id/displaytxtview"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"/>
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/displaytxtview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"/>
+    </androidx.core.widget.NestedScrollView>
+
 
 </LinearLayout>
