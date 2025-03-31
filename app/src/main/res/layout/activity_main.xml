@@ -22,6 +22,13 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:hint="Enter Description"/>
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/edit_text_priority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Priority"
+        android:textSize="20sp"
+        android:inputType="number"/>
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/add_button"
         android:layout_width="match_parent"
