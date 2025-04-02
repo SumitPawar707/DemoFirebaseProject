@@ -15,12 +15,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.demofirebaseproject.Classes.Note
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 
@@ -118,26 +121,28 @@ class MainActivity : AppCompatActivity() {
     }
     private fun loadNotes(){
         //Firestore Queries doesnt have "OR" operator and "NOT" operator (Ex : retrieve document not equal to  (priority =2)) It is not possible
-        noteBookRef.whereGreaterThanOrEqualTo("priority",2)
-            .whereEqualTo("title","Aa")//This query needs to create index
-                                        //This is because firestore doesnt actually look into documents one by one instead it will create indexes
+        val task1=noteBookRef.whereLessThan("priority",2)
+            .orderBy("priority")
             .get()
-            .addOnSuccessListener { querySnapshot -> //querysnapshot contains all the documents
-                //querydocumentsnapshot are gurenteed to exist so there is no need to check
+        val task2 = noteBookRef.whereGreaterThan("priority", 2)
+            .orderBy("priority")
+            .get()
+
+        var allTasks:Task<List<QuerySnapshot>> = Tasks.whenAllSuccess(task1,task2)
+            allTasks.addOnSuccessListener {
                 var data=""
-                for (documentSnapshot in querySnapshot){ //Loop through each document
-                    var note=documentSnapshot.toObject(Note::class.java) //convert to note object
-                    var title=note.title
-                    var desc=note.description
-                    var priority=note.priority
-                    data += "Title : $title \n Description: $desc \n Priority: $priority \n \n"
+                for (querySnapshot in it){
+                    for (documentsnapshot in querySnapshot){
+                        var note=documentsnapshot.toObject(Note::class.java)
+                        note.id=documentsnapshot.id
+                        var title=note.title
+                        var desc=note.description
+                        var priority=note.priority
+                        data += "Id: ${note.id} \n Title: $title \n Description: $desc \n Priority : $priority \n\n"
+                    }
                 }
                 displayTxtview.text=data
             }
-            .addOnFailureListener {
-               Log.d(TAG, it.toString())
-            }
-
     }
 
 }
