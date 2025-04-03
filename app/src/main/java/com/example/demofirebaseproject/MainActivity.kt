@@ -18,6 +18,7 @@ import com.example.demofirebaseproject.Classes.Note
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -68,26 +69,32 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        noteBookRef.whereGreaterThanOrEqualTo("priority",2)
-            .orderBy("priority",Query.Direction.ASCENDING)
-            .addSnapshotListener(this) { documentSnapshot, error ->
-            error?.let {
-                return@addSnapshotListener
-            }
-            //querydocumentsnapshot are gurenteed to exist so there is no need to check
-            documentSnapshot?.let {
-                var data=""
-                for (documentsnapshot in it){
-                    val note=documentsnapshot.toObject(Note::class.java)
-                    note.id=documentsnapshot.id
-                    var title=note.title
-                    var desc=note.description
-                    var priority=note.priority
-                    data += "Id: ${note.id} \n Title: $title \n Description: $desc \n Priority : $priority \n\n"
+        noteBookRef.orderBy("priority")
+            .addSnapshotListener { Snapshot, error ->
+                error?.let {
+                    return@addSnapshotListener
                 }
-                displayTxtview.text=data
+                Snapshot?.let {
+                    for (dc in it.documentChanges){
+                        val id=dc.document.id
+                        val oldIndex=dc.oldIndex
+                        val newIndex=dc.newIndex
+                        when(dc.type){
+                            DocumentChange.Type.ADDED->{
+                                displayTxtview.append("Added :Id: $id \n OldIndex:$oldIndex \n NewIndex: $newIndex")
+                            }
+
+                            DocumentChange.Type.MODIFIED ->{
+                                displayTxtview.append("Modified :Id: $id \n OldIndex:$oldIndex \n NewIndex: $newIndex")
+                            }
+                            DocumentChange.Type.REMOVED -> {
+                                displayTxtview.append("Removed :Id: $id \n OldIndex:$oldIndex \n NewIndex: $newIndex")
+                            }
+                        }
+                    }
+
+                }
             }
-        }
 
     }
 
@@ -119,6 +126,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error Note not added", Toast.LENGTH_SHORT).show()
             }
     }
+    @SuppressLint("SuspiciousIndentation")
     private fun loadNotes(){
         //Firestore Queries doesnt have "OR" operator and "NOT" operator (Ex : retrieve document not equal to  (priority =2)) It is not possible
         val task1=noteBookRef.whereLessThan("priority",2)
