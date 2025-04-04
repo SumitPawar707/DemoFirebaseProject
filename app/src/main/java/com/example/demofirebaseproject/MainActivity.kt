@@ -64,38 +64,12 @@ class MainActivity : AppCompatActivity() {
         loadBtn.setOnClickListener {
             loadNotes()
         }
+        executeBatch()
 
     }
 
     override fun onStart() {
         super.onStart()
-        noteBookRef.orderBy("priority")
-            .addSnapshotListener { Snapshot, error ->
-                error?.let {
-                    return@addSnapshotListener
-                }
-                Snapshot?.let {
-                    for (dc in it.documentChanges){
-                        val id=dc.document.id
-                        val oldIndex=dc.oldIndex
-                        val newIndex=dc.newIndex
-                        when(dc.type){
-                            DocumentChange.Type.ADDED->{
-                                displayTxtview.append("Added :Id: $id \n OldIndex:$oldIndex \n NewIndex: $newIndex")
-                            }
-
-                            DocumentChange.Type.MODIFIED ->{
-                                displayTxtview.append("Modified :Id: $id \n OldIndex:$oldIndex \n NewIndex: $newIndex")
-                            }
-                            DocumentChange.Type.REMOVED -> {
-                                displayTxtview.append("Removed :Id: $id \n OldIndex:$oldIndex \n NewIndex: $newIndex")
-                            }
-                        }
-                    }
-
-                }
-            }
-
     }
 
 //    override fun onStop() {
@@ -151,6 +125,25 @@ class MainActivity : AppCompatActivity() {
                 }
                 displayTxtview.text=data
             }
+    }
+    private fun executeBatch(){
+        val batch=db.batch()
+
+        val doc1=noteBookRef.document("New Note")
+        batch.set(doc1, Note("New note", "New Description", 1))
+
+        val doc2=noteBookRef.document("3T4DeiyzCNPBMgQxecuD")
+        batch.update(doc2,"updated note","updated note description")
+
+        val doc3=noteBookRef.document("95KserIs6dZeozy5xneX")
+        batch.delete(doc3)
+
+        val doc4=noteBookRef.document()
+        batch.set(doc4,Note("Added Note","Added Description",3))
+
+        batch.commit().addOnFailureListener {
+            displayTxtview.text=it.toString()
+        }
     }
 
 }
