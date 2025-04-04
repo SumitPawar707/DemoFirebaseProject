@@ -1,32 +1,22 @@
 package com.example.demofirebaseproject
 
 import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
 
-import android.nfc.Tag
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.demofirebaseproject.Classes.Note
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.toObject
 
 class MainActivity : AppCompatActivity() {
     private lateinit var editTextTitle:EditText
@@ -64,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         loadBtn.setOnClickListener {
             loadNotes()
         }
-        executeBatch()
+        executeTransaction()
 
     }
 
@@ -126,24 +116,19 @@ class MainActivity : AppCompatActivity() {
                 displayTxtview.text=data
             }
     }
-    private fun executeBatch(){
-        val batch=db.batch()
+    private fun executeTransaction(){
+        //This FUnction is next version of batch()
+        //It perform operation on whole batch but additionaly it performs operation on current value
+        //if the user enter new value during process of executing batch operation then it will get that new value as (current value)
 
-        val doc1=noteBookRef.document("New Note")
-        batch.set(doc1, Note("New note", "New Description", 1))
-
-        val doc2=noteBookRef.document("3T4DeiyzCNPBMgQxecuD")
-        batch.update(doc2,"updated note","updated note description")
-
-        val doc3=noteBookRef.document("95KserIs6dZeozy5xneX")
-        batch.delete(doc3)
-
-        val doc4=noteBookRef.document()
-        batch.set(doc4,Note("Added Note","Added Description",3))
-
-        batch.commit().addOnFailureListener {
-            displayTxtview.text=it.toString()
-        }
+       db.runTransaction{
+           val docRef = noteBookRef.document("New Note")
+           val snapshot=it.get(docRef)
+           val newPriority=snapshot.getLong("priority")?.plus(1)
+           it.update(docRef,"priority",newPriority)
+       }
     }
+
+
 
 }
