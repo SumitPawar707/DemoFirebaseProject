@@ -90,7 +90,8 @@ class MainActivity : AppCompatActivity() {
 //        note.put(KEY_TITLE,title)  //here we put (key,value) so it should have been like (title,description) but I used default title
 //        note.put(KEY_DESCRIPTION,description)
 
-        noteBookRef.add(note)
+        noteBookRef.document("QIRVgFBAa4h0U6RQpvRR").collection("Sub Note")
+            .add(note)
             .addOnSuccessListener {
                 Toast.makeText(this, "Note Added Succesfully", Toast.LENGTH_SHORT).show()
             }.addOnFailureListener {
@@ -99,7 +100,8 @@ class MainActivity : AppCompatActivity() {
     }
     @SuppressLint("SuspiciousIndentation")
     private fun loadNotes(){
-        noteBookRef.whereEqualTo("tags.tag1",true)//adding query only retrieve those documment where tags.tag1=true
+        noteBookRef.document("QIRVgFBAa4h0U6RQpvRR")//loading document
+            .collection("Sub Note")//loading collection(Sub Note) in document
             .get()
             .addOnSuccessListener { querysnapshot ->
             var data=""
