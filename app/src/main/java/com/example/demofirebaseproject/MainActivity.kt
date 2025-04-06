@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         loadBtn.setOnClickListener {
             loadNotes()
         }
-        updateArray()
+        updateObjects()
 
     }
 
@@ -78,7 +78,11 @@ class MainActivity : AppCompatActivity() {
         val priority=editTextPriority.text.toString().toInt()
 
         val tagsArray=editTextTags.text.toString().trim().split(",")
-        val tags= tagsArray.toMutableList()
+        val tags= mutableMapOf<String,Boolean>()
+        for(tag in tagsArray){
+            tags[tag]=true
+        }
+
         // Custom data object
         val note=Note(title,description,priority,tags)
         //adding data using map
@@ -95,13 +99,15 @@ class MainActivity : AppCompatActivity() {
     }
     @SuppressLint("SuspiciousIndentation")
     private fun loadNotes(){
-        noteBookRef.get().addOnSuccessListener { querysnapshot ->
+        noteBookRef.whereEqualTo("tags.tag1",true)//adding query only retrieve those documment where tags.tag1=true
+            .get()
+            .addOnSuccessListener { querysnapshot ->
             var data=""
             for (documentSnapshot in querysnapshot){
                 val note=documentSnapshot.toObject(Note::class.java)
                 note.id=documentSnapshot.id
                 data += "\n ID : ${note.id}"
-                for (tag in note.tags!!){
+                for (tag in note.tags!!.keys){ //To only retriveing keys not values
                     data += "\n $tag"
                 }
             }
@@ -111,10 +117,10 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    private fun updateArray(){
-        noteBookRef.document("WGp62k5ia8MAXIFZG9EL")
-            //.update("tags",FieldValue.arrayUnion("New tag")) //adding new tag(element) to tags array
-            .update("tags",FieldValue.arrayRemove("tag3"))  //deleting tag3(element) from tags array
+    private fun updateObjects(){ //updating objects in particular document
+        noteBookRef.document("QIRVgFBAa4h0U6RQpvRR") //getting document first
+           // .update("tags.tag1",false) //updating particular field in document
+            .update("tags.tag1",FieldValue.delete())//deleting tags.tag1 field
     }
 
 
